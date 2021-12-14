@@ -65,7 +65,7 @@ app.get("/vicente/:id", (req, res, next) => {
           }
         }
 
-        let fileXML = builder.create(recibiendo).end({pretty:true})
+        let fileXML = builder.create(recibiendo, { encoding: 'utf-8' }).end({pretty:true})
         console.log(fileXML)
         let nombreDeArchivo = `./xml/${id}.xml`;
         fs.writeFileSync(nombreDeArchivo, fileXML, err =>{
