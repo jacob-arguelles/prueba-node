@@ -6,12 +6,12 @@ const cors = require("cors");
 const notFound = require("./middleware/notFound");
 const handleError = require("./middleware/handleError");
 const app = express();
-const fs = require('fs')
+
+const xml = require('xml');
+const Autoprint = require("./Autoprint");
 
 app.use(cors());
 app.use(express.json());
-
-const builder = require('xmlbuilder')
 
 //Metodos GET
 
@@ -39,40 +39,22 @@ app.get("/vicente/:id", (req, res, next) => {
       if (note) {
         console.log(`se ha encontrado la id:${id}`);
         console.log(note)
-        
-        const recibiendo= {
-          root:{
-            id:{
-              '#text':note.id
-            },
-            nombre:{
-              '#text': note.nombre
-            },
-            apellido:{
-              '#text':note.apellido
-            },
-            edad:{
-              '#text':note.edad
-            },
-            celular:{
-              primer:{
-                '#text':note.celular[0]
-              },
-              segundo:{
-                '#text':note.celular[1]
-              }
-            }
-          }
-        }
 
-        let fileXML = builder.create(recibiendo, { encoding: 'utf-8' }).end({pretty:true})
-        console.log(fileXML)
-        let nombreDeArchivo = `./xml/${id}.xml`;
-        fs.writeFileSync(nombreDeArchivo, fileXML, err =>{
-          if(err) console.log(error)
-        })
-        
-       res.download(nombreDeArchivo, `${id}.xml`)
+        const Enviando = [
+          {informacion:[
+            {nombre:note.nombre},
+            {apellido:note.apellido},
+            {edad:note.edad},
+            {celular:[{Primer: note.celular[0]},{Segundo: note.celular[1]}]},
+            {ID:note.id}
+          ]}
+        ]
+
+        console.log(Enviando)
+        const enviar = xml(Enviando,{declaration:true})
+        console.log(enviar)
+        res.type('application/xml')
+        res.send(enviar)
         
       } else {
         console.log(`No se ha encontrado ninguna coincidencia para id:${id}`);
@@ -89,6 +71,7 @@ app.get("/vicente/:id", (req, res, next) => {
 });
 
 //fin del codigo
+
 
 app.get("/informacion/:id", (req, res, next) => {
   //obteniendo la id de la solicitud
@@ -156,7 +139,7 @@ app.put("/informacion/:id", (req, res) => {
 });
 
 //Metodo POST
-
+app.post(Autoprint)
 app.post("/informacion", (req, res) => {
   console.log("Han realizado un .POST");
   const infor = req.body;
@@ -185,7 +168,7 @@ app.post("/informacion", (req, res) => {
 app.use(notFound);
 app.use(handleError);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log("El servidor se esta ejecutando en el puerto:" + PORT);
   console.log("Se esta conectando la base de datos, espere unos segundos");
