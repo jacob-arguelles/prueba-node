@@ -5,8 +5,6 @@ const infoSchema = new Schema({
   referencia: String,
   descripcion: String,
   email: String,
-  edad: String,
-  celular: Array,
 });
 infoSchema.set("toJSON", {
   transform: (document, returnedObject) => {
